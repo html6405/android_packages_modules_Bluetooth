@@ -26,9 +26,11 @@
 #include "hci/controller_interface_mock.h"
 #include "hci/hci_layer_mock.h"
 #include "internal_include/bt_target.h"
+#include "os/system_properties.h"
 #include "stack/btm/btm_dev.h"
 #include "stack/btm/btm_int_types.h"
 #include "stack/btm/btm_sco.h"
+#include "stack/btm/btm_sco_hfp_hal.h"
 #include "stack/btm/btm_sec.h"
 #include "stack/btm/btm_sec_cb.h"
 #include "stack/include/acl_api.h"
@@ -307,3 +309,20 @@ TEST_F(StackBtmWithInitFreeTest, is_disconnect_reason_valid) {
 TEST_F(StackBtmWithInitFreeTest, Init) {
   ASSERT_FALSE(btm_cb.btm_inq_vars.remname_active);
 }
+
+#ifndef __ANDROID__
+TEST(StackHfpWidebandPropertyTest, HonorsRuntimePolicyAndBuildRestriction) {
+  // Host properties are process-local. Do not alter a device's real policy.
+  struct ResetHostProperties {
+    ~ResetHostProperties() { bluetooth::os::ClearSystemPropertiesForHost(); }
+  } reset;
+  ASSERT_TRUE(bluetooth::os::ClearSystemPropertiesForHost());
+  EXPECT_EQ(!DISABLE_WBS, hfp_hal_interface::get_wbs_supported());
+
+  ASSERT_TRUE(bluetooth::os::SetSystemProperty("bluetooth.hfp.wbs.supported", "false"));
+  EXPECT_FALSE(hfp_hal_interface::get_wbs_supported());
+
+  ASSERT_TRUE(bluetooth::os::SetSystemProperty("bluetooth.hfp.wbs.supported", "true"));
+  EXPECT_EQ(!DISABLE_WBS, hfp_hal_interface::get_wbs_supported());
+}
+#endif

@@ -42,6 +42,7 @@
 #include "btif/include/btif_config.h"
 #include "device/include/device_iot_config.h"
 #include "osi/include/osi.h"  // UNUSED_ATTR
+#include "stack/btm/btm_sco_hfp_hal.h"
 #include "stack/include/bt_uuid16.h"
 #include "stack/include/btm_sec_api_types.h"
 #include "stack/include/l2c_api.h"
@@ -500,7 +501,8 @@ void bta_ag_rfc_open(tBTA_AG_SCB* p_scb, const tBTA_AG_DATA& data) {
             p_scb->peer_addr.ToString(), BTIF_STORAGE_KEY_HFP_SDP_FEATURES,
             (uint8_t*)&p_scb->peer_sdp_features, &sdp_features_size)) {
       bool sdp_wbs_support = p_scb->peer_sdp_features & BTA_AG_FEAT_WBS_SUPPORT;
-      if (!p_scb->received_at_bac && sdp_wbs_support) {
+      if (!p_scb->received_at_bac && sdp_wbs_support &&
+          hfp_hal_interface::get_wbs_supported()) {
         p_scb->codec_updated = true;
         p_scb->peer_codecs = BTM_SCO_CODEC_CVSD | BTM_SCO_CODEC_MSBC;
         p_scb->sco_codec = BTM_SCO_CODEC_MSBC;

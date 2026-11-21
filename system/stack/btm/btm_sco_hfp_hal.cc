@@ -53,8 +53,12 @@ bool is_coding_format_supported(esco_coding_format_t coding_format) {
   return true;
 }
 
-// Android statically compiles WBS support.
-bool get_wbs_supported() { return !DISABLE_WBS; }
+// Legacy controllers may only provide a usable narrowband hardware path.
+// Preserve the build-time restriction even when the property enables WBS.
+bool get_wbs_supported() {
+  return !DISABLE_WBS &&
+         osi_property_get_bool("bluetooth.hfp.wbs.supported", true);
+}
 
 bool get_swb_supported() {
   return osi_property_get_bool("bluetooth.hfp.swb.supported", false) &&
