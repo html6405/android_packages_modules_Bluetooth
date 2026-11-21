@@ -411,7 +411,8 @@ bool bta_ag_sdp_find_attr(tBTA_AG_SCB* p_scb, tBTA_SERVICE_MASK service) {
         /* Do not update if we already received BRSF.           */
         uint16_t sdp_features = p_attr->attr_value.v.u16;
         bool sdp_wbs_support = sdp_features & BTA_AG_FEAT_WBS_SUPPORT;
-        if (!p_scb->received_at_bac && sdp_wbs_support) {
+        if (!p_scb->received_at_bac && sdp_wbs_support &&
+            hfp_hal_interface::get_wbs_supported()) {
           // Workaround for misbehaving HFs (e.g. some Hyundai car kit) that:
           // 1. Indicate WBS support in SDP and codec negotiation in BRSF
           // 2. But do not send required AT+BAC command
